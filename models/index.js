@@ -28,6 +28,9 @@ db.usuarios = require("./user.model.js")(sequelize, Sequelize);
 db.usuarioAuth = require("./usuarioAuth.model.js")(sequelize, Sequelize);
 db.espacios = require("./espacio.model.js")(sequelize, Sequelize);
 db.reservas = require("./reserva.model.js")(sequelize, Sequelize);
+db.notificaciones = require("./notificacion.model.js")(sequelize, Sequelize);
+db.configuracion = require("./configuracion.model.js")(sequelize, Sequelize);
+db.historialReservas = require("./historialReserva.model.js")(sequelize, Sequelize);
 
 // --- Relaciones ---
 // Usuarios <-> Tokens
@@ -41,5 +44,26 @@ db.reservas.belongsTo(db.usuarios, { foreignKey: "usuario_id", as: "usuario" });
 // Espacios <-> Reservas
 db.espacios.hasMany(db.reservas, { as: "reservas", foreignKey: "espacio_id" });
 db.reservas.belongsTo(db.espacios, { foreignKey: "espacio_id", as: "espacio" });
+
+// Usuarios <-> Notificaciones
+db.usuarios.hasMany(db.notificaciones, { as: "notificaciones", foreignKey: "usuario_id" });
+db.notificaciones.belongsTo(db.usuarios, { foreignKey: "usuario_id", as: "usuario" });
+
+// Reservas <-> Notificaciones
+db.reservas.hasMany(db.notificaciones, { as: "notificaciones", foreignKey: "reserva_id" });
+db.notificaciones.belongsTo(db.reservas, { foreignKey: "reserva_id", as: "reserva" });
+
+// Reservas <-> Historial
+db.reservas.hasMany(db.historialReservas, { as: "historial", foreignKey: "reserva_id" });
+db.historialReservas.belongsTo(db.reservas, { foreignKey: "reserva_id", as: "reserva" });
+
+// Usuarios <-> Historial (usuario que realizó la acción)
+db.usuarios.hasMany(db.historialReservas, { as: "acciones", foreignKey: "usuario_id" });
+db.historialReservas.belongsTo(db.usuarios, { foreignKey: "usuario_id", as: "usuario" });
+
+// Relaciones de auditoría en Reservas
+db.reservas.belongsTo(db.usuarios, { foreignKey: "aprobado_por", as: "aprobador" });
+db.reservas.belongsTo(db.usuarios, { foreignKey: "rechazado_por", as: "rechazador" });
+db.reservas.belongsTo(db.usuarios, { foreignKey: "cancelado_por", as: "cancelador" });
 
 module.exports = db;

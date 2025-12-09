@@ -37,6 +37,30 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.JSON, // lista de URLs de documentos adjuntos
       allowNull: true
     },
+    aprobado_por: {
+      type: Sequelize.INTEGER,
+      allowNull: true, // usuario_id del admin que aprobó
+    },
+    rechazado_por: {
+      type: Sequelize.INTEGER,
+      allowNull: true, // usuario_id del admin que rechazó
+    },
+    cancelado_por: {
+      type: Sequelize.INTEGER,
+      allowNull: true, // usuario_id de quien canceló
+    },
+    fecha_aprobacion: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
+    fecha_rechazo: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
+    fecha_cancelacion: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
     is_active: {
       type: Sequelize.BOOLEAN,
       defaultValue: true
