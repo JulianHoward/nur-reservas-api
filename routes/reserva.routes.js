@@ -17,11 +17,18 @@ router.get("/", requireRole("admin", "encargado"), ReservaController.list);
 // Mis reservas (usuario normal)
 router.get("/mis-reservas", ReservaController.listByUsuario);
 
-// Obtener una reserva por ID
-router.get("/:id", ReservaController.getById);
+// Listar disponibilidad de espacios
+// NOTE: esta ruta usa query params, debe estar antes de rutas con :id
+router.get("/disponibilidad", ReservaController.listDisponibilidad);
 
-// Actualizar reserva (solo admin/encargado)
-router.put("/:id", requireRole("admin", "encargado"), ReservaController.update);
+/*
+  IMPORTANT: colocar rutas que contienen texto después de :id ANTES
+  que la ruta dinámica GET /:id. Así Express no confundirá /:id/cancelar
+  con /:id.
+*/
+
+// Cancelar reserva por usuario dueño (PRIMERO entre las rutas con :id)
+router.put("/:id/cancelar", ReservaController.cancelarPorUsuario);
 
 // Aprobar reserva (solo admin/encargado)
 router.put("/:id/aprobar", requireRole("admin", "encargado"), ReservaController.aprobar);
@@ -32,11 +39,10 @@ router.put("/:id/rechazar", requireRole("admin", "encargado"), ReservaController
 // Eliminar (desactivar) reserva (solo admin/encargado)
 router.delete("/:id", requireRole("admin", "encargado"), ReservaController.delete);
 
-// Cancelar reserva por usuario dueño
-router.put("/:id/cancelar", ReservaController.cancelarPorUsuario);
+// Actualizar reserva (solo admin/encargado)
+router.put("/:id", requireRole("admin", "encargado"), ReservaController.update);
 
-// Listar disponibilidad de espacios
-router.get("/disponibilidad", ReservaController.listDisponibilidad);
-
+// Obtener una reserva por ID (ÚLTIMO)
+router.get("/:id", ReservaController.getById);
 
 module.exports = router;
