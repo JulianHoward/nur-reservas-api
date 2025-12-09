@@ -18,39 +18,24 @@ exports.create = async (req, res) => {
     if (missing.length)
       return res.status(400).json({ message: `Faltan: ${missing.join(", ")}` });
 
-    const {
-      usuario_id,
-      espacio_id,
-      fecha_inicio,
-      fecha_fin,
-      tipo_evento,
-      asistentes,
-    } = req.body;
+    const { usuario_id, espacio_id, fecha_inicio, fecha_fin, tipo_evento, asistentes } = req.body;
 
-    // Validar que el usuario exista
     const usuario = await db.usuarios.findByPk(usuario_id);
     if (!usuario) return res.status(400).json({ message: "Usuario no encontrado" });
 
-    // Validar que el espacio exista
     const espacio = await db.espacios.findByPk(espacio_id);
     if (!espacio) return res.status(400).json({ message: "Espacio no encontrado" });
 
-    // Validar tipo_evento
     const tiposValidos = ["académico", "deportivo", "cultural", "administrativo"];
     if (!tiposValidos.includes(tipo_evento))
       return res.status(400).json({ message: "Tipo de evento no válido" });
 
-    // Validar asistentes
     if (isNaN(asistentes) || asistentes <= 0)
       return res.status(400).json({ message: "Número de asistentes inválido" });
 
-    // Validar fechas
     if (new Date(fecha_inicio) >= new Date(fecha_fin))
-      return res
-        .status(400)
-        .json({ message: "La fecha de inicio debe ser antes de la fecha de fin" });
+      return res.status(400).json({ message: "La fecha de inicio debe ser antes de la fecha de fin" });
 
-    // Validar conflicto de horarios
     const conflicto = await db.reservas.findOne({
       where: {
         espacio_id,
@@ -61,16 +46,10 @@ exports.create = async (req, res) => {
       },
     });
 
-    if (conflicto)
-      return res
-        .status(400)
-        .json({ message: "El espacio ya está reservado en ese horario." });
+    if (conflicto) return res.status(400).json({ message: "El espacio ya está reservado en ese horario." });
 
-    // Manejar archivos (multer)
     let documentos = null;
-    if (req.files && req.files.length > 0) {
-      documentos = req.files.map((f) => f.filename);
-    }
+    if (req.files && req.files.length > 0) documentos = req.files.map(f => f.filename);
 
     const reserva = await db.reservas.create({
       usuario_id,
@@ -164,9 +143,7 @@ exports.rechazar = async (req, res) => {
       return res.status(404).json({ message: "Reserva no encontrada" });
 
     if (!req.body.motivo_rechazo)
-      return res
-        .status(400)
-        .json({ message: "Debe indicar un motivo de rechazo." });
+      return res.status(400).json({ message: "Debe indicar un motivo de rechazo." });
 
     await reserva.update({
       estado: "rechazada",
@@ -179,7 +156,7 @@ exports.rechazar = async (req, res) => {
   }
 };
 
-// Eliminar (desactivar)
+// Eliminar (desactivar) reserva
 exports.delete = async (req, res) => {
   try {
     const reserva = await db.reservas.findByPk(req.params.id);
@@ -197,29 +174,18 @@ exports.delete = async (req, res) => {
 exports.cancelarPorUsuario = async (req, res) => {
   try {
     const reserva = await db.reservas.findByPk(req.params.id);
-    if (!reserva)
-      return res.status(404).json({ message: "Reserva no encontrada" });
+    if (!reserva) return res.status(404).json({ message: "Reserva no encontrada" });
 
-    // Validar que haya usuario logueado
-    if (!res.locals.user)
-      return res.status(403).json({ message: "Usuario no autenticado" });
+    const user = res.locals.user;
+    if (!user) return res.status(403).json({ message: "Usuario no autenticado" });
 
-    // Validar dueño
-    if (reserva.usuario_id !== res.locals.user.id)
-      return res
-        .status(403)
-        .json({ message: "No autorizado para cancelar esta reserva" });
+    if (Number(reserva.usuario_id) !== Number(user.id))
+      return res.status(403).json({ message: "No autorizado para cancelar esta reserva" });
 
-    // Solo pendientes pueden cancelarse
     if (reserva.estado !== "pendiente")
-      return res
-        .status(400)
-        .json({ message: "Solo reservas pendientes se pueden cancelar" });
+      return res.status(400).json({ message: "Solo reservas pendientes se pueden cancelar" });
 
-    await reserva.update({
-      estado: "rechazada",
-      motivo_rechazo: "Cancelada por el usuario",
-    });
+    await reserva.update({ estado: "rechazada", motivo_rechazo: "Cancelada por el usuario" });
 
     return res.json({ message: "Reserva cancelada", reserva });
   } catch (err) {
@@ -253,7 +219,7 @@ exports.listByUsuario = async (req, res) => {
   }
 };
 
-// Listar disponibilidad
+// Listar disponibilidad de un espacio
 exports.listDisponibilidad = async (req, res) => {
   try {
     const { espacio_id, fecha_inicio, fecha_fin } = req.query;
