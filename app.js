@@ -51,7 +51,7 @@ app.use((err, req, res, next) => {
 
 // --- MOCK DE AUTENTICACIÓN GLOBAL PARA TESTS ---
 if (process.env.NODE_ENV === "test") {
-  app.use((req, res, next) => {
+  app.use(async (req, res, next) => {
     let token = req.headers.authorization || "";
     if (token.startsWith("Bearer ")) token = token.slice(7);
 
@@ -60,7 +60,18 @@ if (process.env.NODE_ENV === "test") {
 
     const match = token.match(/token-usuario-(\d+)/);
     if (match) {
-      res.locals.user = { id: Number(match[1]), role: "usuario" };
+      const userId = Number(match[1]);
+      // Consultar el usuario real para obtener su role
+      try {
+        const user = await db.usuarios.findByPk(userId);
+        if (user) {
+          res.locals.user = { id: user.id, role: user.role };
+        } else {
+          res.locals.user = { id: userId, role: "usuario" };
+        }
+      } catch (err) {
+        res.locals.user = { id: userId, role: "usuario" };
+      }
     } else if (token.includes("admin")) {
       res.locals.user = { id: 0, role: "admin" };
     }
