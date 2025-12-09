@@ -12,5 +12,11 @@ router.get("/espacios-mas-usados", ReporteController.espaciosMasUsados);
 router.get("/cancelados-rechazados", ReporteController.canceladosRechazados);
 router.get("/por-area-solicitante", ReporteController.porAreaSolicitante);
 
+// Exportaciones
+router.get("/reservas/exportar-pdf", ReporteController.exportarReservasPDF);
+router.get("/reservas/exportar-excel", ReporteController.exportarReservasExcel);
+router.get("/espacios-mas-usados/exportar-excel", ReporteController.exportarEspaciosMasUsadosExcel);
+router.get("/cancelados-rechazados/exportar-excel", ReporteController.exportarCanceladosRechazadosExcel);
+
 module.exports = router;
 
