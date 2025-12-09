@@ -211,7 +211,7 @@ describe("Gestión de Reservas", () => {
     it("Debería listar todas las reservas (admin)", async () => {
       const res = await request(app)
         .get("/api/reservas")
-        .set("Authorization", "Bearer token-admin");
+        .set("Authorization", `Bearer token-usuario-${admin.id}`);
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -220,7 +220,7 @@ describe("Gestión de Reservas", () => {
     it("Debería filtrar reservas por usuario_id", async () => {
       const res = await request(app)
         .get(`/api/reservas?usuario_id=${usuario.id}`)
-        .set("Authorization", "Bearer token-admin");
+        .set("Authorization", `Bearer token-usuario-${admin.id}`);
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -232,7 +232,7 @@ describe("Gestión de Reservas", () => {
     it("Debería filtrar reservas por espacio_id", async () => {
       const res = await request(app)
         .get(`/api/reservas?espacio_id=${espacio.id}`)
-        .set("Authorization", "Bearer token-admin");
+        .set("Authorization", `Bearer token-usuario-${admin.id}`);
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -244,7 +244,7 @@ describe("Gestión de Reservas", () => {
     it("Debería filtrar reservas por estado", async () => {
       const res = await request(app)
         .get("/api/reservas?estado=pendiente")
-        .set("Authorization", "Bearer token-admin");
+        .set("Authorization", `Bearer token-usuario-${admin.id}`);
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -349,9 +349,10 @@ describe("Gestión de Reservas", () => {
         is_active: true,
       });
 
+      // Usar el ID del admin real en lugar del mock
       const res = await request(app)
         .put(`/api/reservas/${reserva.id}/aprobar`)
-        .set("Authorization", "Bearer token-admin");
+        .set("Authorization", `Bearer token-usuario-${admin.id}`);
 
       expect(res.statusCode).toBe(200);
       expect(res.body.message).toBe("Reserva aprobada");
@@ -374,9 +375,10 @@ describe("Gestión de Reservas", () => {
         is_active: true,
       });
 
+      // Usar el ID del admin real en lugar del mock
       const res = await request(app)
         .put(`/api/reservas/${reserva.id}/rechazar`)
-        .set("Authorization", "Bearer token-admin")
+        .set("Authorization", `Bearer token-usuario-${admin.id}`)
         .send({ motivo_rechazo: "Espacio no disponible" });
 
       expect(res.statusCode).toBe(200);
@@ -493,7 +495,7 @@ describe("Gestión de Reservas", () => {
 
       const res = await request(app)
         .delete(`/api/reservas/${reserva.id}`)
-        .set("Authorization", "Bearer token-admin");
+        .set("Authorization", `Bearer token-usuario-${admin.id}`);
 
       expect(res.statusCode).toBe(200);
       expect(res.body.message).toBe("Reserva desactivada");

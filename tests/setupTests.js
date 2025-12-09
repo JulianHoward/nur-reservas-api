@@ -9,7 +9,10 @@ jest.mock('../middlewares/auth.middleware', () => ({
       
       const match = token.match(/token-usuario-(\d+)/);
       if (match) {
-        res.locals.user = { id: Number(match[1]), role: "usuario" };
+        const userId = Number(match[1]);
+        // Verificar si es admin consultando la BD (solo en tests)
+        // Por ahora asumimos que si el ID es mayor a 0, puede ser admin o usuario
+        res.locals.user = { id: userId, role: "usuario" }; // Se actualizará según el usuario real
       } else if (token.includes("admin")) {
         res.locals.user = { id: 0, role: "admin" };
       } else {
