@@ -8,6 +8,10 @@ const db = require("./models");
 const authRoutes = require("./routes/auth.routes");
 const espacioRoutes = require("./routes/espacio.routes");
 const reservaRoutes = require("./routes/reserva.routes");
+const notificacionRoutes = require("./routes/notificacion.routes");
+const reporteRoutes = require("./routes/reporte.routes");
+const calendarioRoutes = require("./routes/calendario.routes");
+const configuracionRoutes = require("./routes/configuracion.routes");
 
 const app = express();
 
@@ -72,6 +76,10 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/espacios", espacioRoutes);
 app.use("/api/reservas", reservaRoutes);
+app.use("/api/notificaciones", notificacionRoutes);
+app.use("/api/reportes", reporteRoutes);
+app.use("/api/calendario", calendarioRoutes);
+app.use("/api/configuracion", configuracionRoutes);
 
 // --- EXPORTAR APP ---
 module.exports = app;
